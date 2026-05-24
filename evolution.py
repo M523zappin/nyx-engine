@@ -60,7 +60,6 @@ class AutonomyManager:
             brain.save_weights()
             print("[EVOLUTION COMPLETE: Nyx weight layers optimized natively.]")
             
-            # Clear dataset after evolution to cycle the learning phase
             try:
                 os.remove("reasoning_dataset.jsonl")
             except Exception:
