@@ -1,9 +1,11 @@
-# Nyx-Cat Deployment Script
+# Nyx-Cat Bootstrap
 $NyxDir = "$HOME/.nyx"
-if (!(Test-Path $NyxDir)) { New-Item -ItemType Directory -Path $NyxDir }
+if (!(Test-Path $NyxDir)) { 
+    New-Item -ItemType Directory -Path $NyxDir 
+}
 
-# Link SOUL.md to the active runtime
+# Sync local SOUL to runtime
 Copy-Item -Path ".\Soul.md" -Destination "$NyxDir\SOUL.md" -Force
 
-Write-Host "Sovereign Intelligence Initialized." -ForegroundColor Cyan
+Write-Host "Nyx-Cat Initialized. Entering Sovereign State." -ForegroundColor Green
 python NyxEngine.py
