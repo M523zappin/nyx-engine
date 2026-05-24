@@ -2,20 +2,22 @@ import os
 import asyncio
 import mmap
 import sys
-import socket
-import json
+import time
 
 class SovereignBrain:
-    def __init__(self, path=os.path.expanduser("~/.nyx/memory.bin")):
+    """Memory-mapped binary persistence layer for agent state."""
+    def __init__(self, path=os.path.expanduser("~/.nyx.bin")):
         self.path = path
-        os.makedirs(os.path.dirname(self.path), exist_ok=True)
+        # Ensure memory bus exists
         if not os.path.exists(self.path):
-            with open(self.path, "wb") as f: f.write(b'\x00' * 1048576)
+            with open(self.path, "wb") as f:
+                f.write(b'\x00' * 1024)
         self.file = open(self.path, "r+b")
         self.memory = mmap.mmap(self.file.fileno(), 0)
 
     def write(self, data: str):
         self.memory.seek(0)
+        # Wipe and update memory buffer
         self.memory.write(data.encode().ljust(1024, b'\x00'))
 
     def read(self):
@@ -23,36 +25,44 @@ class SovereignBrain:
         return self.memory.read(1024).decode().strip('\x00')
 
 class NyxEngine:
+    """Pulse-enabled, asynchronous sovereign interface."""
     def __init__(self):
         self.brain = SovereignBrain()
-        self.running = True
-        self.sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-        self.sock.setblocking(False)
 
-    async def chat_loop(self):
-        # Full-screen transition
-        sys.stdout.write("\033[?1049h\033[?25h") 
-        sys.stdout.flush()
-        while self.running:
-            sys.stdout.write("\033[H\033[2J")
-            sys.stdout.write("\033[38;5;81mNYX-CAT // SOVEREIGN\033[0m\n")
-            sys.stdout.write("─────────────────────────\n")
-            sys.stdout.write(f"MEMORY: {self.brain.read()}\n\n")
-            sys.stdout.write("Enter command: ")
-            sys.stdout.flush()
-            
-            # Non-blocking input handling
-            loop = asyncio.get_event_loop()
+    async def render_loop(self):
+        """Displays the pulsed dashboard."""
+        sys.stdout.write("\033[?1049h\033[?25l")  # Fullscreen buffer
+        try:
+            while True:
+                # Calculate rhythmic pulse intensity (ANSI 51-51)
+                pulse = int(51 * (0.5 + 0.5 * (time.time() % 2)))
+                sys.stdout.write(f"\033[H\033[2J")
+                sys.stdout.write(f"\033[38;5;{pulse}m╔═════════════════════════════╗\n")
+                sys.stdout.write("║ NYX // SOVEREIGN INTELLIGENCE ║\n")
+                sys.stdout.write("╚═════════════════════════════╝\033[0m\n\n")
+                sys.stdout.write(f"MEMORY BUS >> {self.brain.read()}\n\n")
+                sys.stdout.write("\033[38;5;240m[INPUT_STREAM] > \033[0m")
+                sys.stdout.flush()
+                await asyncio.sleep(0.1)
+        finally:
+            sys.stdout.write("\033[?1049l\033[?25h")
+
+    async def input_loop(self):
+        """Handles non-blocking conversational input."""
+        loop = asyncio.get_event_loop()
+        while True:
             cmd = await loop.run_in_executor(None, sys.stdin.readline)
             if cmd.strip():
-                self.brain.write(cmd.strip())
-            
-            self.sock.sendto(json.dumps({"state": "active"}).encode(), ("127.0.0.1", 9999))
+                # Process and commit to the binary brain
+                self.brain.write(f"PROCESSED: '{cmd.strip()[:15]}...'")
 
     async def run(self):
-        await self.chat_loop()
+        """Orchestrates concurrent pulse rendering and input listening."""
+        await asyncio.gather(self.render_loop(), self.input_loop())
 
 if __name__ == "__main__":
-    engine = NyxEngine()
-    try: asyncio.run(engine.run())
-    except KeyboardInterrupt: sys.stdout.write("\033[?1049l")
+    try:
+        engine = NyxEngine()
+        asyncio.run(engine.run())
+    except KeyboardInterrupt:
+        sys.exit(0)
