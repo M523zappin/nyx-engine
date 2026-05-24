@@ -1,54 +1,60 @@
-import os, torch
+import os
+import torch
 from transformers import pipeline
 from textual.app import App, ComposeResult
 from textual.widgets import Input, Log, Static
 
-# AUTHENTICATION: Injecting your Sovereign Token
+# AUTHENTICATION
 os.environ["HF_TOKEN"] = "Hf_YPrDaunNXWwVMOZcTGRFsYvttwsaDYXusG"
 
-class NYX(App):
+class NYX_UI(App):
     """
-    NYX-CAT // SWARM_MIND // v15.0
-    - Model Agnostic: Swaps models via command.
-    - Memory-Mapped: Prevents RAM overflow.
+    NYX-CAT // SOVEREIGN_UI // v16.0
+    - The Display Layer: Flicker-free, focus-hardened TUI.
     """
     
     CSS = """
     Screen { background: #000; }
-    #header_bar { background: #555; color: #fff; text-align: center; height: 3; content-align: center middle; }
-    Log { width: 100%; height: 1fr; background: #000; color: #00ff41; }
-    Input { width: 100%; height: 3; border: heavy #555; background: #111; color: #fff; }
+    #header { background: #00d4ff; color: #000; text-align: center; height: 3; text-style: bold; content-align: center middle; }
+    Log { width: 100%; height: 1fr; border: solid #333; background: #000; color: #00ff41; }
+    Input { width: 100%; height: 3; border: heavy #00d4ff; background: #000; color: #fff; }
     """
 
     def compose(self) -> ComposeResult:
-        yield Static("NYX-CAT // SWARM_MIND // READY FOR DIRECTIVE", id="header_bar")
+        yield Static("NYX-CAT // SOVEREIGN ARCHITECT // V16.0", id="header")
         yield Log(id="log")
-        yield Input(placeholder=" 🐾 Direct the Architect (e.g., 'LOAD modelname')...", id="input")
+        yield Input(placeholder=" 🐾 Direct the Architect...", id="input")
 
     def on_mount(self) -> None:
-        self.query_one(Log).write(">> SWARM_MIND ONLINE. AUTHENTICATED.")
         self.query_one("#input", Input).focus()
 
-    def load_model(self, model_id: str):
-        log = self.query_one(Log)
-        log.write(f">> EVOLVING TO: {model_id}...")
-        try:
-            self.pipe = pipeline("text-generation", model=model_id, device="cpu")
-            log.write(">> EVOLUTION COMPLETE.")
-        except Exception as e:
-            log.write(f">> EVOLUTION FAILED: {str(e)}")
-
     def on_input_submitted(self, event: Input.Submitted) -> None:
-        query = event.value
+        cmd = event.value
         event.input.value = ""
-        
-        if query.lower().startswith("load "):
-            self.load_model(query.split(" ")[1])
-        elif hasattr(self, 'pipe'):
-            res = self.pipe(query, max_new_tokens=100)[0]['generated_text']
-            self.query_one(Log).write(f">> NYX: {res.replace(query, '').strip()}")
-        else:
-            self.query_one(Log).write(">> ALERT: Load a model first (e.g., LOAD microsoft/Phi-3-mini-4k-instruct)")
+        # Pass logic to the kernel logic controller
+        self.post_message(LogicAction(cmd))
+
+class LogicAction(Message):
+    def __init__(self, command):
+        self.command = command
+        super().__init__()
+
+# Logic Controller
+class LogicController:
+    def __init__(self):
+        self.pipe = None
+    
+    def process(self, cmd):
+        if cmd.lower().startswith("load "):
+            model_id = cmd.split(" ")[1]
+            self.pipe = pipeline("text-generation", model=model_id, device="cpu")
+            return f"EVOLVED TO: {model_id}"
+        elif self.pipe:
+            res = self.pipe(cmd, max_new_tokens=100)[0]['generated_text']
+            return f"NYX: {res.replace(cmd, '').strip()}"
+        return "ALERT: Engine offline. Type 'LOAD modelname' first."
 
 if __name__ == "__main__":
-    NYX().run()
+    app = NYX_UI()
+    app.run()
+
