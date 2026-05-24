@@ -1,19 +1,16 @@
-# Nyx: Sovereign Terminal Kernel
+# Nyx: Autonomous Sovereign Intelligence (ASI)
 
-Nyx is a native, persistent terminal kernel engineered for zero-latency execution. By moving from interpreted scripting to a compiled Daemon-Client architecture, Nyx provides a dedicated, state-aware interface that operates independently of local shell profile bloat.
+Nyx is a self-evolving, persistent R&D kernel engineered for zero-latency autonomous execution. By leveraging an IPC-driven architecture and a persistent Sovereign Execution Pool (SEP), Nyx operates independently of legacy shell constraints to function as your personal AI operating system.
 
-### 🛠️ Architectural Foundation
-* **Sovereign Execution Pool (SEP):** The persistent `nyx-daemon.exe` core maintains memory, manages the Skill Registry, and processes requests without overhead.
-* **IPC-Driven Interface:** The `nyx.exe` client utilizes Named Pipes to communicate directly with the daemon, bypassing standard shell initialization lag.
-* **Zero-Conflict Logic:** Nyx avoids shell profile hooks, ensuring total environment isolation.
+## 🧠 Architectural Foundation
+* **Sovereign Execution Pool (SEP):** A persistent background daemon (`nyx-daemon.exe`) that manages logic, memory, and autonomic observation.
+* **Ghost-Buffer TUI:** A high-performance terminal interface that utilizes the Alternate Screen Buffer to create a lag-free, application-grade workspace without shell bloat.
+* **Autonomic Observation Loop:** Nyx monitors `~\.nyx\inbox\` for task manifests, synthesizing logic and grafting skills into the `registry.db` autonomously.
+* **Relational Intelligence:** A robust SQLite memory layer with auto-incrementing audit trails and thread-safe concurrency.
 
-### 🚀 Build & Deployment
-1. **Initialize:** Ensure your workspace is located at `%USERPROFILE%\.nyx`.
-2. **Compile:** Generate binaries using the C# compiler (`csc`):
-   - `csc /target:exe /out:"%USERPROFILE%\.nyx\nyx-daemon.exe" NyxKernel.cs RegistryManager.cs /r:System.Data.SQLite.dll`
-   - `csc /target:exe /out:"%USERPROFILE%\.nyx\nyx.exe" nyx.cs`
-3. **Bootstrap:** Launch `nyx-daemon.exe` to initiate the Sovereign Execution Pool.
-4. **Execute:** Run `nyx <command>` from any terminal window.
-
-### 🧠 Evolution Path
-Nyx is an autonomous system. Every agent connection is indexed into the local `registry.db` for "Skill Grafting," enabling the kernel to learn, categorize, and execute complex workflows as your personal AI operating system.
+## 🚀 Deployment
+1. **Initialize Workspace:** Create `%USERPROFILE%\.nyx\inbox` and `\outbox`.
+2. **Compile:**
+   ```bash
+   csc /target:exe /out:"%USERPROFILE%\.nyx\nyx-daemon.exe" NyxKernel.cs RegistryManager.cs /r:System.Data.SQLite.dll
+   csc /target:exe /out:"%USERPROFILE%\.nyx\nyx.exe" nyx.cs
