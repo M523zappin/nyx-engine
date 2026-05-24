@@ -1,73 +1,57 @@
 import os
 import torch
 import asyncio
-from concurrent.futures import ThreadPoolExecutor
 from transformers import pipeline
 from textual.app import App, ComposeResult
 from textual.widgets import Input, Log, Static
-from textual.worker import Worker
 
 # AUTHENTICATION
 os.environ["HF_TOKEN"] = "Hf_YPrDaunNXWwVMOZcTGRFsYvttwsaDYXusG"
 
 class NYX(App):
     """
-    NYX-CAT // SOVEREIGN ARCHITECT // v18.0 // STABLE
-    - Pattern: Worker-Thread Inference (Non-blocking UI)
-    - Architecture: Event-driven command handling
+    NYX // SOVEREIGN_KERNEL // v21.0 // PERSISTENT_STATE
+    - Architecture: Preloaded Identity-Aware Inference Engine.
     """
+    
     CSS = """
     Screen { background: #000; }
-    #header { height: 3; background: #00d4ff; color: #000; text-align: center; text-style: bold; content-align: center middle; }
-    Log { width: 100%; height: 1fr; border: solid #333; background: #000; color: #00ff41; padding: 1; }
-    Input { width: 100%; height: 3; border: heavy #00d4ff; background: #111; color: #fff; }
+    #header { height: 1; background: #1a1a1a; color: #888; padding: 0 1; text-align: right; }
+    Log { width: 100%; height: 1fr; background: #000; color: #ddd; padding: 1; }
+    Input { width: 100%; height: 3; background: #000; color: #fff; border-top: solid #333; }
     """
 
     def compose(self) -> ComposeResult:
-        yield Static("NYX-CAT // SOVEREIGN ARCHITECT // v18.0", id="header")
+        yield Static("NYX // IDENTITY_LOCKED // STATE: PRELOADED", id="header")
         yield Log(id="log")
-        yield Input(placeholder="🐾 Awaiting Directive...", id="input")
+        yield Input(placeholder=" 🐾 Direct the Architect...", id="input")
 
     def on_mount(self) -> None:
-        self.pipe = None
-        self.executor = ThreadPoolExecutor(max_workers=1)
         self.query_one("#input", Input).focus()
-        self.query_one(Log).write(">> NYX-CAT v18.0 // WORKER-THREAD ACTIVE.")
-
-    async def run_inference(self, prompt: str):
-        """Runs in background to prevent UI lag."""
-        try:
-            loop = asyncio.get_event_loop()
-            res = await loop.run_in_executor(self.executor, lambda: self.pipe(prompt, max_new_tokens=100))
-            return res[0]['generated_text'].replace(prompt, "").strip()
-        except Exception as e:
-            return f"FAULT: {str(e)}"
-
-    def on_input_submitted(self, event: Input.Submitted) -> None:
-        cmd = event.value
-        event.input.value = ""
-        log = self.query_one(Log)
+        self.log_msg(">> Initializing NYX Persona...")
         
-        if cmd.lower().startswith("load "):
-            model_id = cmd.split(" ")[1]
-            log.write(f">> EVOLVING BRAIN: {model_id}...")
-            # Still blocking for the model load itself, but logic is clean
-            self.pipe = pipeline("text-generation", model=model_id, device="cpu")
-            log.write(">> EVOLUTION SUCCESS.")
-        elif self.pipe:
-            log.write(f">> INPUT: {cmd}")
-            # Non-blocking worker execution
-            self.run_worker(self.run_inference(cmd))
-        else:
-            log.write(">> ALERT: Engine empty. Execute 'LOAD <model_id>' first.")
+        # Preloading the identity-model
+        try:
+            # We use the Phi-3-mini as the core identity model
+            self.pipe = pipeline("text-generation", model="microsoft/Phi-3-mini-4k-instruct", device="cpu")
+            self.log_msg(">> NYX Identity Preloaded. Sovereign State Active.")
+        except Exception as e:
+            self.log_msg(f">> FAULT: {str(e)}")
 
-    def run_worker(self, coroutine):
-        # Textual worker integration
-        self.run_worker = self.run_worker_func(coroutine)
-    
-    async def run_worker_func(self, coroutine):
-        res = await coroutine
-        self.query_one(Log).write(f">> NYX: {res}")
+    def log_msg(self, msg):
+        self.query_one(Log).write(msg)
+
+    async def on_input_submitted(self, event: Input.Submitted) -> None:
+        cmd = event.value.strip()
+        event.input.value = ""
+        
+        if self.pipe:
+            self.log_msg(f"👤 {cmd}")
+            loop = asyncio.get_event_loop()
+            res = await loop.run_in_executor(None, lambda: self.pipe(cmd, max_new_tokens=150))
+            self.log_msg(f"✨ NYX: {res[0]['generated_text'].replace(cmd, '').strip()}")
+        else:
+            self.log_msg(">> ALERT: Engine initialization failed.")
 
 if __name__ == "__main__":
     NYX().run()
