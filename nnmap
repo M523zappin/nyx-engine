@@ -1,1 +1,1 @@
-irm https://antigravity.google/cli/install.ps1 | iex
+agy agent create --name nyx --model gemini-3.5-flash
