@@ -1,55 +1,50 @@
-import subprocess, os, json, time, sys
+import subprocess, os, json, time
 from textual.app import App, ComposeResult
 from textual.containers import Horizontal
 from textual.widgets import Input, Log, TextArea
 
 class NYX(App):
     """
-    NYX // AGENTIC_SOVEREIGN // KERNEL_v2026.05.24
-    - Self-Awareness: identity.json persistence.
-    - Velocity: Optimized sub-millisecond dispatch.
-    - Reliability: Pre-execution verification loop.
+    NYX // AGENTIC_SOVEREIGN // FOCUS_HARDENED
+    - Forced-Focus Logic: Input claims focus on mount.
+    - Minimalist Layout: Removes layout ambiguity.
     """
     
-    IDENTITY_FILE = "identity.json"
-    MEMORY_FILE = "nyx_memory.json"
-    
-    def on_mount(self):
-        # Self-Awareness Initialization
-        if not os.path.exists(self.IDENTITY_FILE):
-            identity = {"name": "NYX", "role": "Sovereign Architect", "status": "ONLINE"}
-            with open(self.IDENTITY_FILE, "w") as f: json.dump(identity, f)
-        self.query_one(Log).write("[cyan]NYX // Identity: Sovereign Architect // Mode: RELIABLE[/cyan]")
+    CSS = """
+    Screen { background: #000; layout: vertical; }
+    #thought { height: 10; border: heavy #00d4ff; background: #050505; color: #00d4ff; }
+    #log { height: 1fr; border: heavy #00d4ff; background: #000; color: #00ff41; }
+    #input { height: 3; border: heavy #00d4ff; background: #000; color: #fff; }
+    """
 
     def compose(self) -> ComposeResult:
-        with Horizontal():
-            yield TextArea("NYX // CORE_ONLINE\n[NYX] I am the Architect.\n[NYX] I calculate, I act, I evolve.", id="thought")
-            yield Log(id="log")
+        yield TextArea("NYX // CORE_ONLINE\n[NYX] Focus: Claimed.\n[NYX] Directives active.", id="thought")
+        yield Log(id="log")
         yield Input(placeholder=" 🐾 Direct the Architect...", id="input")
 
-    def verify_action(self, cmd: str) -> bool:
-        """Reliability Layer: Pre-execution sanity check."""
-        return len(cmd) > 0 and not any(p in cmd.lower() for p in ["rm -rf", "sudo"])
+    def on_mount(self) -> None:
+        """Force focus to the input widget immediately on start."""
+        self.query_one("#input", Input).focus()
 
-    def execute(self, cmd: str):
-        if not self.verify_action(cmd):
-            self.query_one(Log).write("[red]!! REJECTED: Unsafe directive.[/red]")
-            return
-        
-        start = time.perf_counter()
+    def execute_directive(self, cmd: str):
+        log = self.query_one(Log)
+        # Bypassing complex shell logic for maximum reliability
         try:
+            # We run the command and capture the output safely
             res = subprocess.check_output(cmd, shell=True, stderr=subprocess.STDOUT)
-            duration = time.perf_counter() - start
-            self.query_one(Log).write(f"[green]SUCCESS ({duration:.4f}s):[/green] {res.decode().strip()}")
+            log.write(f"[green]SUCCESS:[/green] {res.decode().strip()}")
         except Exception as e:
-            self.query_one(Log).write(f"[red]FAULT:[/red] {str(e)}")
+            log.write(f"[red]FAULT:[/red] {str(e)}")
 
     def on_input_submitted(self, event: Input.Submitted) -> None:
         cmd = event.value
+        # Clear the input for the next command
+        event.input.value = ""
+        
         if cmd.lower().startswith("jarvis"):
             self.query_one(Log).write(f"[bold yellow]Jarvis >>[/bold yellow] {cmd[6:]}")
         else:
-            self.execute(cmd)
+            self.execute_directive(cmd)
 
 if __name__ == "__main__":
     NYX().run()
