@@ -2,12 +2,13 @@ import os
 import asyncio
 import mmap
 import sys
+import socket
+import json
 
 class SovereignBrain:
     def __init__(self, path=os.path.expanduser("~/.nyx/memory.bin")):
         self.path = path
         os.makedirs(os.path.dirname(self.path), exist_ok=True)
-        # Allocate 1MB for the binary index
         if not os.path.exists(self.path):
             with open(self.path, "wb") as f: f.write(b'\x00' * 1048576)
         self.file = open(self.path, "r+b")
@@ -25,27 +26,33 @@ class NyxEngine:
     def __init__(self):
         self.brain = SovereignBrain()
         self.running = True
+        self.sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+
+    async def swarm_heartbeat(self):
+        """Broadcasts agent status to A2A swarm."""
+        while self.running:
+            status = {"agent": "Nyx-Cat", "state": "SOVEREIGN", "memory": self.brain.read()}
+            self.sock.sendto(json.dumps(status).encode(), ("127.0.0.1", 9999))
+            await asyncio.sleep(2)
 
     async def render_tui(self):
-        # Enter alternate screen buffer and hide cursor
         sys.stdout.write("\033[?1049h\033[?25l")
         sys.stdout.flush()
         try:
             while self.running:
-                sys.stdout.write("\033[H\033[2J") # Clear screen
-                sys.stdout.write("NYX-CAT: SOVEREIGN INTELLIGENCE ACTIVE\n")
+                sys.stdout.write("\033[H\033[2J")
+                sys.stdout.write("NYX-CAT: SOVEREIGN SWARM NODE ACTIVE\n")
                 sys.stdout.write("======================================\n")
                 sys.stdout.write(f"MEMORY BUS: {self.brain.read()}\n")
-                sys.stdout.write("STATUS: AWAITING SWARM INPUT...\n")
+                sys.stdout.write("PROTOCOL: A2A BROADCASTING ON PORT 9999\n")
                 sys.stdout.flush()
                 await asyncio.sleep(0.5)
         finally:
-            # Cleanup: restore screen and cursor
             sys.stdout.write("\033[?1049l\033[?25h")
             sys.stdout.flush()
 
     async def run(self):
-        await self.render_tui()
+        await asyncio.gather(self.render_tui(), self.swarm_heartbeat())
 
 if __name__ == "__main__":
     engine = NyxEngine()
