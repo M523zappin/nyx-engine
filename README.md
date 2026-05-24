@@ -1,8 +1,13 @@
-# 🐈 Nyx Engine: Sovereign Autonomous Terminal
+# 🐈 Nyx Engine: Sovereign Build Specification
 
-Nyx is a stateful, dynamic kernel for the modern shell. Unlike static interfaces, Nyx uses a secondary screen buffer to maintain a persistent UI, separate from your command history.
+Nyx is a native terminal kernel. It avoids shell profile hooks, opting for direct binary mapping to ensure the interface never conflicts with your local shell settings.
 
-## ⚡ Instant Deployment
-Open **Administrator PowerShell** and execute:
-```powershell
-iex(irm "[https://raw.githubusercontent.com/M523zappin/nyx-engine/main/install.ps1](https://raw.githubusercontent.com/M523zappin/nyx-engine/main/install.ps1)")
+## 🛠️ Build Structure
+- **Core Engine:** `engine.ps1` maintains an isolated render-loop in the terminal's alternate screen buffer.
+- **Binary Mapping:** `nyx.bat` provides direct access to the Sovereign Execution Pool.
+- **Latency-Free UI:** High-frequency rendering via the `1049` buffer sequence.
+
+## 🚀 Execution
+1. Place `engine.ps1` in your repo.
+2. Run `install.ps1`.
+3. Call `nyx` from any terminal window.
