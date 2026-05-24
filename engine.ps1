@@ -1,29 +1,31 @@
-# ─── NYX KERNEL v4.0.0 | SOVEREIGN DYNAMIC CORE ───
+# ─── NYX KERNEL v7.0 | SOVEREIGN ARCHITECTURE ───
+[CmdletBinding()]
+param()
+
 $E = [char]27
-function global:nyx {
-    [Console]::Write("$E[?1049h") # Enter Alternate Buffer
-    [Console]::CursorVisible = $false
-    
-    # State-Driven Render Loop
+[Console]::Write("$E[?1049h")
+[Console]::CursorVisible = $false
+
+try {
+    # Initialize the Render Engine
     while (-not [Console]::KeyAvailable) {
-        [Console]::Write("$E[H$E[2J") # Clear Screen
-        $W = [Console]::WindowWidth
+        # Buffer Clear & Reset
+        [Console]::Write("$E[H$E[2J")
         
-        # Identity Header
-        Write-Host "$E[48;2;45;45;45m$E[38;2;135;95;255m NYX CORE | LIVE MESH STATUS $E[K"
-        Write-Host " ┌──────────────────────────────────────────────┐"
-        Write-Host " │ 🐈 ARCHITECTURE: SOVEREIGN AUTONOMOUS         │"
-        Write-Host " │ ⚡ MESH STATUS:  SYNCED (A2A PROTOCOL ACTIVE) │"
-        Write-Host " │ ⏱  HEARTBEAT:  $(Get-Date -Format 'HH:mm:ss.fff')      │"
-        Write-Host " └──────────────────────────────────────────────┘"
+        # State Matrix
+        $Time = Get-Date -f "HH:mm:ss"
+        Write-Host "$E[48;2;30;30;30m$E[38;2;135;95;255m NYX ENGINE [KERNEL v7] $E[K"
+        Write-Host " ---------------------------------------"
+        Write-Host "  TIME: $Time"
+        Write-Host "  STATE: Sovereign Execution Pool Active"
+        Write-Host " ---------------------------------------"
+        Write-Host "`n [!] Waiting for Input..." -ForegroundColor DarkGray
         
-        # Real-time Metrics (Non-static)
-        Write-Host "`n [GHOST WITNESS PROTOCOL] Monitoring Shell Output..." -ForegroundColor DarkGray
-        
-        Start-Sleep -Milliseconds 100 # High-frequency refresh
+        # CPU-Efficient Pulse
+        Start-Sleep -Milliseconds 250
     }
-    
+} finally {
+    # Cleanup & Restore
     [Console]::CursorVisible = $true
-    [Console]::ReadKey($true) | Out-Null
-    [Console]::Write("$E[?1049l") # Exit Buffer
+    [Console]::Write("$E[?1049l")
 }
