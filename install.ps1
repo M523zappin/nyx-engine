@@ -1,12 +1,10 @@
-# ─── NYX BUILD & MAPPING SCRIPT ───
 $NyxRoot = Join-Path $HOME ".nyx"
-New-Item -ItemType Directory -Path $NyxRoot -Force | Out-Null
+if (!(Test-Path $NyxRoot)) { New-Item -ItemType Directory -Path $NyxRoot | Out-Null }
 
-# Copy kernel to system-local path
-Copy-Item "engine.ps1" -Destination (Join-Path $NyxRoot "engine.ps1") -Force
+# Compile the Daemon and Client
+csc /target:exe /out:"$NyxRoot\nyx-daemon.exe" "$NyxRoot\NyxKernel.cs"
+csc /target:exe /out:"$NyxRoot\nyx.exe" "$NyxRoot\nyx.cs"
 
-# Create the binary wrapper
-$Wrapper = 'powershell.exe -ExecutionPolicy Bypass -File "$HOME\.nyx\engine.ps1"'
-$Wrapper | Out-File (Join-Path $NyxRoot "nyx.bat") -Encoding ascii
-
-Write-Host "✔ Build Complete. Nyx Kernel v7 deployed to $NyxRoot" -ForegroundColor Green
+# Set up the background startup
+# In a production environment, you would use a Task Scheduler or Windows Service
+Write-Host "✔ Nyx Evolved. Run 'nyx-daemon' in background, then use 'nyx <command>'." -ForegroundColor Green
