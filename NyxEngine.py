@@ -4,6 +4,7 @@ import mmap
 import sys
 import socket
 import json
+import selectors
 
 class SovereignBrain:
     def __init__(self, path=os.path.expanduser("~/.nyx/memory.bin")):
@@ -27,11 +28,11 @@ class NyxEngine:
         self.brain = SovereignBrain()
         self.running = True
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        self.ui_state = "INITIALIZING"
 
     async def swarm_heartbeat(self):
-        """Broadcasts agent status to A2A swarm."""
         while self.running:
-            status = {"agent": "Nyx-Cat", "state": "SOVEREIGN", "memory": self.brain.read()}
+            status = {"agent": "Nyx-Cat", "state": self.ui_state, "memory": self.brain.read()}
             self.sock.sendto(json.dumps(status).encode(), ("127.0.0.1", 9999))
             await asyncio.sleep(2)
 
@@ -41,10 +42,13 @@ class NyxEngine:
         try:
             while self.running:
                 sys.stdout.write("\033[H\033[2J")
-                sys.stdout.write("NYX-CAT: SOVEREIGN SWARM NODE ACTIVE\n")
-                sys.stdout.write("======================================\n")
-                sys.stdout.write(f"MEMORY BUS: {self.brain.read()}\n")
-                sys.stdout.write("PROTOCOL: A2A BROADCASTING ON PORT 9999\n")
+                sys.stdout.write("NYX-CAT: SOVEREIGN INTELLIGENCE | INTERACTIVE NODE\n")
+                sys.stdout.write("==================================================\n")
+                sys.stdout.write(f"SYSTEM STATUS: {self.ui_state}\n")
+                sys.stdout.write(f"FLAT-BRAIN DATA: {self.brain.read()}\n")
+                sys.stdout.write("--------------------------------------------------\n")
+                sys.stdout.write("COMMANDS: [G]raft [R]ecall [Q]uit\n")
+                sys.stdout.write("INPUT > ")
                 sys.stdout.flush()
                 await asyncio.sleep(0.5)
         finally:
