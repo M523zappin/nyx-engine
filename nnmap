@@ -1,19 +1,34 @@
-import requests, sys, subprocess
+import requests, subprocess, os
 
-def nyx_think(prompt):
-    # We target the 1.5b model specifically for low-RAM performance
+def get_context():
+    # Automatically scan the current directory to give NYX "eyes"
+    return subprocess.getoutput("tree -L 2") 
+
+def nyx_ide(task):
+    context = get_context()
+    prompt = f"""
+    You are NYX, the Sovereign Architect. 
+    CURRENT WORKSPACE:
+    {context}
+    
+    TASK: {task}
+    
+    ACTION: Provide ONLY the next shell command to execute. 
+    If the task requires multiple steps, provide only the first command.
+    """
+    
     res = requests.post("http://localhost:11434/api/generate", json={
         "model": "qwen2.5-coder:1.5b",
-        "prompt": f"You are NYX. Concise. Build shell commands. User: {prompt}",
+        "prompt": prompt,
         "stream": False
     })
     return res.json()['response'].strip()
 
-print("NYX Terminal Initialized (Low-RAM Mode)")
+# Main Loop: IDE as an Agent
 while True:
-    task = input("NYX> ")
-    cmd = nyx_think(task)
-    print(f"COMMAND: {cmd}")
-    # Only execute if you approve
-    if input("Run this? (y/n): ") == 'y':
-        subprocess.run(cmd, shell=True)
+    task = input("NYX IDE> ")
+    cmd = nyx_ide(task)
+    print(f"Proposed: {cmd}")
+    if input("Execute? (y/n/edit): ") == 'y':
+        result = subprocess.run(cmd, shell=True, capture_output=True, text=True)
+        print(f"Output: {result.stdout}\nError: {result.stderr}")
