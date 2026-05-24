@@ -1,20 +1,21 @@
 import os
 import time
-import sys
 
 def prowl():
-    print("\x1b[?1049h\x1b[?25l") # Ghost Buffer
+    # Clear the screen once at start
+    os.system('cls')
     try:
         while True:
-            # Clear UI and update
-            os.system('cls' if os.name == 'nt' else 'clear')
-            print(" NYX-CAT [SOVEREIGN] | " + time.strftime("%H:%M:%S"))
-            print("═" * 40)
+            # Move cursor to top-left instead of clearing to avoid flicker
+            print("\033[H", end="")
+            print(f" NYX-CAT [SOVEREIGN] | {time.strftime('%H:%M:%S')} ")
+            print("═" * 50)
             print("\n 🗨  Nyx-Cat Prowling... 🐾\n")
-            print("─" * 40)
+            print("─" * 50)
+            print("\n[Status: Autonomous & Active]")
             time.sleep(1)
     except KeyboardInterrupt:
-        print("\x1b[?1049l\x1b[?25h") # Exit Buffer
+        print("\nExiting Sovereign State.")
 
 if __name__ == "__main__":
     prowl()
