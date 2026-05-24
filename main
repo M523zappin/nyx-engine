@@ -1,0 +1,18 @@
+/plan Analyze the repository architecture and look specifically for NyxEngine.py (or my terminal layout file). I need you to evolve the terminal user interface to mimic a high-fidelity, asymmetric agent workspace similar to modern IDE environments, while safeguarding the zero-dependency sentinel runtime.
+
+Please execute the following steps precisely:
+
+1. READ THE FILE:
+Locate and read the complete contents of `NyxEngine.py` to identify the input loops, terminal rendering code, and error checking logic.
+
+2. REFACTOR THE UI DESIGN:
+- Replace rigid, boxy ASCII frames with fluid padding, using the 'rich' library for clean layouts.
+- Header Anchor: Cleanly print system statuses on the top line (e.g., "SYSTEM: ACTIVE // CORE: ZERO-DEPENDENCY // ADAPTATION: ENGAGED").
+- Center Canvas: Use a centrally aligned Panel displaying "⚡ NYX-CAT // SOVEREIGN ENGINE DEPLOYMENT" with a dim placeholder string: "Ask anything... 'Extract skills from connected a2a agents'".
+- Bilateral Status Footer: Align the bottom metadata dynamically using Columns so technical statuses (Engine version, current active sub-agent state) sit perfectly on the left, and keyboard shortcut indicators ("tab agents" and "ctrl+p commands") align perfectly to the right.
+
+3. REFACTOR THE SENTINEL MECHANISM:
+- Ensure the input loop routes directly through a dedicated NyxSentinel monitor class.
+- The sentinel must catch runtime interrupts gracefully, manage state variables (e.g., "READY", "MUTATING", "EXECUTING"), and protect the core kernel from crashing if bad directives or breaking a2a skill configurations are entered.
+
+Review the file first, output the code modification plan, and then apply the structural edits directly.
