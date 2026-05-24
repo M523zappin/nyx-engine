@@ -3,36 +3,31 @@ using System.IO.Pipes;
 using System.IO;
 
 class NyxClient {
-    static void Main() {
-        Console.Clear();
-        // Enter Alternate Screen Buffer for a "Sovereign" app look
-        Console.Write("\x1b[?1049h");
-        
-        try {
-            using (var client = new NamedPipeClientStream(".", "NyxPipe", PipeDirection.InOut)) {
-                client.Connect(1000);
-                using (var writer = new StreamWriter(client) { AutoFlush = true })
-                using (var reader = new StreamReader(client)) {
-                    
-                    Console.WriteLine("--- Nyx Sovereign Chat [Connected] ---");
-                    
-                    while (true) {
-                        Console.Write("\nNyx > ");
-                        string input = Console.ReadLine();
-                        if (input == "exit") break;
+    static string[] models = { "Nyx-Core", "Nyx-Science", "Nyx-Quantum" };
+    static int selectedModel = 0;
+    static bool showMenu = false;
 
-                        writer.WriteLine(input);
-                        string response = reader.ReadLine();
-                        
-                        // Structured UI output
-                        Console.ForegroundColor = ConsoleColor.Cyan;
-                        Console.WriteLine($"[Kernel]: {response}");
-                        Console.ResetColor();
-                    }
-                }
-            }
-        } finally {
-            Console.Write("\x1b[?1049l"); // Exit buffer
+    static void Main() {
+        Console.Write("\x1b[?1049h\x1b[?25l"); // App Mode
+        Console.Clear();
+        
+        while (true) {
+            RenderUI();
+            var key = Console.ReadKey(true);
+            if (key.Key == ConsoleKey.F1) showMenu = !showMenu;
+            if (showMenu && key.Key == ConsoleKey.DownArrow) selectedModel = (selectedModel + 1) % models.Length;
+            if (key.Key == ConsoleKey.Escape) break;
+        }
+        Console.Write("\x1b[?1049l\x1b[?25h");
+    }
+
+    static void RenderUI() {
+        Console.SetCursorPosition(0, 0);
+        Console.WriteLine(" Nyx Sovereign Intelligence | [F1] Models ");
+        Console.WriteLine("──────────────────────────────────────────");
+        if (showMenu) {
+            for (int i = 0; i < models.Length; i++)
+                Console.WriteLine(i == selectedModel ? $"> {models[i]} <" : $"  {models[i]}  ");
         }
     }
 }
