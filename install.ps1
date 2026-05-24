@@ -30,7 +30,6 @@ if (-not $OllamaInstalled) {
 } else {
     Write-Host "   $($Style.Jade)✔ Local model engine verified on system PATH.$($Style.Reset)"
     
-    # Ensure the background model daemon service loop is running
     if (-not $OllamaProcess) {
         Write-Host "   $($Style.Cyan)-> Launching inference daemon in background...$($Style.Reset)"
         Start-Process -FilePath "ollama" -ArgumentList "serve" -WindowStyle Hidden -ErrorAction SilentlyContinue
@@ -38,7 +37,6 @@ if (-not $OllamaInstalled) {
     }
 
     # 3. Autonomous Model Procurement Loop
-    # Background pre-loading of our high-speed, lightweight 2026 local code model target
     $TargetModel = "qwen2.5-coder:7b"
     Write-Host "   $($Style.Cyan)-> System checking for model footprint ($TargetModel)...$($Style.Reset)"
     
@@ -46,7 +44,6 @@ if (-not $OllamaInstalled) {
     if ($LocalModels -notlike "*$TargetModel*") {
         Write-Host "   $($Style.Amber)🐾 Pulling model layer signatures ($TargetModel) directly to local VRAM...$($Style.Reset)"
         Write-Host "   $($Style.Violet)   (This happens completely automatically. Grab a coffee while Nyx primes her claws.)$($Style.Reset)"
-        # Pull model asynchronously to avoid blocking the pipeline completely
         Start-Process -FilePath "ollama" -ArgumentList "pull $TargetModel" -NoNewWindow -Wait
         Write-Host "   $($Style.Jade)✔ Local model intelligence matrix successfully secured.$($Style.Reset)"
     } else {
@@ -54,22 +51,25 @@ if (-not $OllamaInstalled) {
     }
 }
 
-# 4. Inject Persistent User Shell Profiles & Global Aliases
+# 4. Inject Persistent User Shell Profiles & Global Aliases Safely
 $ProfilePath = $PROFILE.CurrentUserAllHosts
 if (-not (Test-Path $ProfilePath)) {
     $null = New-Item -ItemType File -Path $ProfilePath -Force
 }
 
-$HookPayload = @"
+# Using a strict literal here-string so no processing occurs on the installer side
+$HookPayload = @'
 
 # ─── NYX RUNTIME HOOK ───
-if (Test-Path '$NyxDir') {
+if (Test-Path (Join-Path $HOME ".nyx")) {
     function global:nyx {
-        Write-Host "`n$($Style.Violet)   🐈 NYX ENGINE:$($Style.Cyan) Standing by to prowl codebase matrix...$($Style.Reset)"
-        # Future UI terminal rendering blocks call sequentially here
+        $E = [char]27
+        $S = @{ Violet = "$E[38;2;135;95;255m"; Cyan = "$E[38;2;0;255;255m"; Reset = "$E[0m" }
+        Write-Host "`n$($S.Violet)   🐈 NYX ENGINE:$($S.Cyan) Standing by to prowl codebase matrix...$($S.Reset)"
+        # Future high-performance visual layout loops connect sequentially here
     }
 }
-"@
+'@
 
 $ProfileContent = Get-Content $ProfilePath -Raw -ErrorAction SilentlyContinue
 if ($ProfileContent -notlike "*NYX RUNTIME HOOK*") {
