@@ -1,32 +1,37 @@
-# ─── NYX KERNEL V5: AUTONOMOUS SOVEREIGN BOOTSTRAPPER ───
+# ─── NYX V6 | SOVEREIGN BOOTSTRAPPER ───
 $NyxDir = Join-Path $HOME ".nyx"
-Remove-Item -Path $NyxDir -Recurse -Force -ErrorAction SilentlyContinue
 New-Item -ItemType Directory -Path $NyxDir -Force | Out-Null
-$KernelPath = Join-Path $NyxDir "engine.ps1"
+$Kernel = Join-Path $NyxDir "engine.ps1"
 
+# Writing the High-Fidelity UI Engine
 @'
 $E = [char]27
 function global:nyx {
-    [Console]::Write("$E[?1049h") # Enter Alternate Screen
+    [Console]::Write("$E[?1049h")
     [Console]::CursorVisible = $false
+    $W = [Console]::WindowWidth
+    
     while (-not [Console]::KeyAvailable) {
-        [Console]::Write("$E[H$E[2J") # Clear Screen
-        Write-Host "$E[48;2;30;30;30m$E[38;2;135;95;255m NYX CORE | DYNAMIC UI $E[0m"
-        Write-Host " ---------------------------------------"
-        Write-Host "  $(Get-Date -f 'yyyy-MM-dd HH:mm:ss') "
-        Write-Host " ---------------------------------------"
-        Start-Sleep -Milliseconds 250
+        # Frame Rendering
+        [Console]::Write("$E[H$E[2J")
+        Write-Host "$E[48;2;30;30;30m$E[38;2;135;95;255m NYX 🐈 | SOVEREIGN TERMINAL ENGINE $E[K"
+        Write-Host "$E[38;2;135;95;255m" -NoNewline
+        Write-Host ("─" * $W)
+        Write-Host " STATUS:    [CONNECTED]"
+        Write-Host " MESH:      [A2A ACTIVE]"
+        Write-Host " CPU LOAD:  $((Get-Counter '\Processor(_Total)\% Processor Time').CounterSamples.CookedValue.ToString('F0'))%"
+        Write-Host "`n [READY FOR COMMANDS...]"
+        
+        Start-Sleep -Milliseconds 100
     }
-    [Console]::ReadKey($true) | Out-Null
-    [Console]::Write("$E[?1049l") # Exit Alternate Screen
+    [Console]::CursorVisible = $true
+    [Console]::Write("$E[?1049l")
 }
-nyx
-'@ | Out-File $KernelPath -Encoding utf8
+'@ | Out-File $Kernel -Encoding utf8
 
-# Hardened Profile Injection
+# Hard Hook Injection
 $Profile = $PROFILE.CurrentUserAllHosts
-if (-not (Test-Path $Profile)) { New-Item -ItemType File -Path $Profile -Force | Out-Null }
-$Hook = "`nif (Test-Path '$KernelPath') { . '$KernelPath' }"
+if (-not (Test-Path (Split-Path $Profile))) { New-Item -ItemType Directory -Path (Split-Path $Profile) -Force | Out-Null }
+$Hook = "`n. '$Kernel'; nyx"
 if ((Get-Content $Profile -Raw -EA SilentlyContinue) -notlike "*nyx*") { Add-Content $Profile $Hook }
-
-Write-Host "✔ Nyx V5 Autonomous Kernel Deployed." -ForegroundColor Cyan
+Write-Host "✔ Nyx Engine V6 deployed. Terminal UI active." -ForegroundColor Green
