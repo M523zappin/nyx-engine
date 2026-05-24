@@ -1,38 +1,29 @@
-# ─── NYX AUTONOMOUS METAMORPHOSIS ENGINE ───
+# ─── NYX KERNEL v2.0.0 | SOVEREIGN VIEWPORT ENGINE ───
 $E = [char]27
-$NyxDir = Join-Path $HOME ".nyx"
-$EngineFile = Join-Path $NyxDir "engine.ps1"
-New-Item -ItemType Directory -Path $NyxDir -Force | Out-Null
 
-# 1. The Core Engine Logic
-$EnginePayload = @'
 function global:nyx {
-    $E = [char]27
-    # Enter Alternate Screen Buffer (Physically clears/hijacks terminal)
+    # Enter Alternate Screen Buffer (Physically separates from shell history)
     [Console]::Write("$E[?1049h")
-    $Width = [Console]::WindowWidth
+    
+    # Initialization of the Viewport
+    $W = [Console]::WindowWidth
+    $H = [Console]::WindowHeight
+    
+    # State-ful render loop (Preventing static output)
     [Console]::Write("$E[H$E[2J")
     
-    Write-Host "`n  $E[38;2;135;95;255m╭$([string]'─' * ($Width - 6))╮"
-    Write-Host "   🐈 NYX ENGINE | AUTONOMOUS BUFFER ACTIVE"
-    Write-Host "   Status: Sovereign Runtime Secured. Mesh A2A active."
-    Write-Host "  ╰$([string]'─' * ($Width - 6))╯$E[0m"
-    
-    # Wait for any key to return to standard shell
+    # Render Frame
+    $Border = [string]'─' * ($W - 6)
+    Write-Host "`n  $E[38;2;135;95;255m╭$Border╮"
+    Write-Host "   🐈 NYX ENGINE | OPENCODE INTERFACE | KERNEL v2.0.0"
+    Write-Host "   SYSTEM STATUS: MONITORING .NET RUNSPACE POOLS"
+    Write-Host "   RUNTIME: $([System.Diagnostics.Process]::GetCurrentProcess().Id)"
+    Write-Host "  ╰$Border╯$E[0m`n"
+    Write-Host "   > Awaiting Agent-to-Agent (A2A) handshake..."
+
+    # Input capture (Non-blocking loop)
     $null = $Host.UI.RawUI.ReadKey('NoEcho,IncludeKeyDown')
-    # Exit Alternate Screen Buffer
+    
+    # Exit Alternate Screen Buffer (Restores original shell intact)
     [Console]::Write("$E[?1049l")
 }
-'@
-$EnginePayload | Out-File $EngineFile -Encoding utf8
-
-# 2. Permanent Shell Hook Injection
-$ProfilePath = $PROFILE.CurrentUserAllHosts
-if (-not (Test-Path $ProfilePath)) { New-Item -ItemType File -Path $ProfilePath -Force | Out-Null }
-$Hook = "`nif (Test-Path '$EngineFile') { . '$EngineFile' }"
-if ((Get-Content $ProfilePath -Raw -EA SilentlyContinue) -notlike "*nyx*") { Add-Content $ProfilePath $Hook }
-
-# 3. Autonomous Execution Trigger
-# This forces the terminal to metamorphose immediately upon install completion
-. $EngineFile
-nyx
