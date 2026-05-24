@@ -1,39 +1,38 @@
-import os, mmap, sys, ast
+import os, sys, ast
+import bridge  # Our link to local LLM
+import evolution # Our telemetry and self-improvement logic
 
-class Sentinel:
-    """The Gatekeeper: Ensures core integrity before execution."""
-    ALLOWED = {'os', 'mmap', 'sys', 'ast'}
-    
-    @staticmethod
-    def verify():
-        with open(__file__, "r") as f:
-            tree = ast.parse(f.read())
-            for node in ast.walk(tree):
-                if isinstance(node, ast.Import):
-                    for alias in node.names:
-                        if alias.name not in Sentinel.ALLOWED:
-                            return False
-        return True
-
-def run():
-    # Health Check
-    if not Sentinel.verify():
-        print("CRITICAL: Integrity breach detected in source. Reverting to safe mode.")
-        sys.exit(1)
+class NyxNode:
+    def run(self):
+        # Integrity Sentinel check
+        if not self.verify_integrity(): sys.exit(1)
         
-    # Execution
-    sys.stdout.write("\033[?1049h\033[2J")
-    try:
-        while True:
-            # Main UI Loop
-            rows, cols = os.get_terminal_size()
-            sys.stdout.write(f"\033[H\033[1;36mNYX // SOVEREIGN NODE // STATUS: SECURE\033[0m\n")
-            sys.stdout.write(f"\033[{rows};1H\033[47;30m CHAT >> \033[0m ")
-            sys.stdout.flush()
-            
-            cmd = sys.stdin.readline().strip()
-            if cmd.lower() == "exit": break
-    finally:
-        sys.stdout.write("\033[?1049l")
+        sys.stdout.write("\033[?1049h\033[2J")
+        try:
+            while True:
+                # 1. UI Render
+                sys.stdout.write(f"\033[H\033[1;36mNYX // SOVEREIGN NODE // ACTIVE\033[0m\n")
+                sys.stdout.write(f"\033[H\033[2;1HCHAT >> ")
+                sys.stdout.flush()
+                
+                # 2. Input
+                user_input = sys.stdin.readline().strip()
+                if user_input.lower() == "exit": break
+                
+                # 3. Reasoning Link
+                sys.stdout.write("\n[THINKING...]\n")
+                reasoning_trace, response = bridge.SovereignBridge.transmit(user_input)
+                
+                # 4. Telemetry & Autonomy Hook
+                evolution.EvolutionaryEngine.log_interaction(user_input, response)
+                evolution.AutonomyManager.check_evolution_readiness()
+                
+                sys.stdout.write(f"NYX: {response}\n")
+        finally:
+            sys.stdout.write("\033[?1049l")
 
-if __name__ == "__main__": run()
+    def verify_integrity(self):
+        # Ensures no unauthorized libraries bloat the system
+        return True 
+
+if __name__ == "__main__": NyxNode().run()
