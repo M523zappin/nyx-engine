@@ -1,14 +1,13 @@
-# 🐈 Nyx Engine: Sovereign Autonomous Terminal Agent
+# 🐈 Nyx Engine: Sovereign Autonomous Kernel
 
-Nyx is a state-of-the-art, object-driven terminal environment operating natively within your shell. Built to completely bypass the structural limits of legacy cloud-tied AI interfaces, Nyx merges high-speed, local hardware acceleration with a modern, responsive user experience to deliver an absolute coding companion with zero operational costs, zero subscription walls, and zero telemetry leakage.
+Nyx is the terminal environment that competitors only dream of. By utilizing **Alternate Screen Buffers** and a **High-Frequency UI Loop**, Nyx provides a stateful, dynamic interface that never drifts, never freezes, and operates with absolute sovereignty.
 
-Unlike rigid applications that hijack your screen or read terminal outputs as flat text, Nyx tracks system interactions as raw object streams, offering deep execution awareness while running on 100% sovereign local silicon.
+## 🚀 Why Nyx Surpasses Competition
+- **Dual-Buffer Sovereignty:** Unlike "OpenCode" or standard terminals, Nyx separates UI process from history state.
+- **Dynamic Heartbeat:** High-frequency rendering ensures the interface is always current.
+- **A2A Mesh Ready:** Built-in protocol hooks for decentralized agent communication.
 
----
-
-## 🚀 Instant Omnipresent Deployment
-
-To autonomously pull, verify, and spin up the entire runtime layer instantly, paste this single lowercase command into your PowerShell window and press **Enter**:
-
+## ⚡ Deployment
+Admin PowerShell:
 ```powershell
-iex(irm [tinyurl.com/nyxinst](https://tinyurl.com/nyxinst))
+iex(irm "[https://raw.githubusercontent.com/M523zappin/nyx-engine/main/install.ps1](https://raw.githubusercontent.com/M523zappin/nyx-engine/main/install.ps1)")
