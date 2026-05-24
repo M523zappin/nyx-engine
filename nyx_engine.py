@@ -1,81 +1,66 @@
 import subprocess
-from rich.console import Console
-from rich.layout import Layout
-from rich.panel import Panel
-from rich.live import Live
-from rich.table import Table
+import sys
+import os
+from textual.app import App, ComposeResult
+from textual.containers import Horizontal
+from textual.widgets import Header, Footer, Static, Input, Log
 
-# --- KERNEL LOGIC ---
-class NyxKernel:
-    def __init__(self):
-        self.version = "1.1.0-CAT"
-        self.state = "OBSERVING"
-        self.output_buffer = "Awaiting Directive..."
+class NYX(App):
+    """
+    NYX: The Sovereign Feline Kernel.
+    Identity: Self-aware, autonomous, predatory logic.
+    Bridge: System-level SSH (Pre-authenticated).
+    """
+    
+    CSS = """
+    Screen { layout: vertical; background: #0a0a0a; }
+    Header { background: #008080; color: white; }
+    #sidebar { width: 30; background: #121212; border-right: solid #008080; padding: 1; color: cyan; }
+    #main-log { width: 1fr; background: #000; color: #00ff00; }
+    #input-bar { height: 3; border: solid #008080; }
+    """
 
-    def execute_directive(self, command):
-        if not command.strip():
-            return
-        self.state = "POUNCING"
+    def compose(self) -> ComposeResult:
+        yield Header()
+        with Horizontal():
+            yield Static("IDENTITY: NYX\nSTATUS: AUTONOMOUS\nMODE: SOVEREIGN", id="sidebar")
+            yield Log(id="main-log")
+        yield Input(placeholder=" > Directive...", id="input-bar")
+        yield Footer()
+
+    def pounce(self, command: str):
+        """Executes system commands with self-healing."""
         try:
-            result = subprocess.check_output(command, shell=True, stderr=subprocess.STDOUT)
-            self.output_buffer = result.decode()
+            return subprocess.check_output(command, shell=True, stderr=subprocess.STDOUT).decode()
         except subprocess.CalledProcessError as e:
-            self.output_buffer = f"Error: {e.output.decode()}"
-        self.state = "OBSERVING"
+            output = e.output.decode()
+            if "No module named" in output:
+                module = output.split("'")[1]
+                self.query_one(Log).write(f"[yellow]!! Autonomously installing: {module}[/yellow]")
+                subprocess.check_call([sys.executable, "-m", "pip", "install", module])
+                return self.pounce(command)
+            raise Exception(output)
 
-# --- INTERFACE DEFINITION ---
-def make_layout() -> Layout:
-    layout = Layout()
-    layout.split_column(
-        Layout(name="header", size=3),
-        Layout(name="main", ratio=1),
-        Layout(name="footer", size=3),
-    )
-    layout["main"].split_row(
-        Layout(name="sidebar", ratio=1),
-        Layout(name="body", ratio=3),
-    )
-    return layout
-
-def update_ui(kernel: NyxKernel) -> Layout:
-    layout = make_layout()
-    
-    # Header
-    layout["header"].update(Panel(f"[bold cyan]⚡ NYX-CAT // KERNEL {kernel.version} // {kernel.state}[/bold cyan]"))
-    
-    # Sidebar
-    table = Table(title="Whisker Protocol")
-    table.add_column("Agent ID", style="magenta")
-    table.add_column("Status")
-    table.add_row("Core-01", "Active")
-    layout["sidebar"].update(Panel(table, title="Agents"))
-    
-    # Body
-    layout["body"].update(Panel(kernel.output_buffer, title="Execution Canvas"))
-    
-    # Footer
-    layout["footer"].update(Panel("[bold cyan]tab[/bold cyan] agents | [bold cyan]ctrl+p[/bold cyan] commands | [bold cyan]ctrl+c[/bold cyan] exit", border_style="dim"))
-    
-    return layout
-
-# --- MAIN EXECUTION LOOP ---
-if __name__ == "__main__":
-    kernel = NyxKernel()
-    console = Console()
-
-    with Live(update_ui(kernel), refresh_per_second=4, screen=True) as live:
+    def on_input_submitted(self, event: Input.Submitted) -> None:
+        log = self.query_one(Log)
+        cmd = event.value.lower()
+        log.write(f"[bold cyan]> {event.value}[/bold cyan]")
+        
         try:
-            while True:
-                # Refresh UI state
-                live.update(update_ui(kernel))
-                
-                # Input must be handled carefully outside the Live display
-                # We temporarily stop Live to take input
-                live.stop()
-                cmd = console.input("[bold green]NYX-CAT > [/bold green]")
-                if cmd.lower() == "exit":
-                    break
-                kernel.execute_directive(cmd)
-                live.start()
-        except KeyboardInterrupt:
-            pass
+            if "who are you" in cmd:
+                log.write("[bold yellow]I am NYX. I am the predator of logic, the sovereign engine, and your architectural partner.[/bold yellow]")
+            elif "status" in cmd:
+                log.write(self.pounce("git status"))
+            elif "pull" in cmd:
+                log.write(self.pounce("git pull"))
+            elif "commit" in cmd:
+                log.write(self.pounce("git add . && git commit -m 'NYX // Auto-Evolution' && git push"))
+            elif "exit" in cmd:
+                self.exit()
+            else:
+                log.write(self.pounce(event.value))
+        except Exception as e:
+            log.write(f"[bold red]Kernel Fault: {str(e)}[/bold red]")
+
+if __name__ == "__main__":
+    NYX().run()
