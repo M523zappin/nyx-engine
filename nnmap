@@ -1,34 +1,3 @@
-import requests, subprocess, os
-
-def get_context():
-    # Automatically scan the current directory to give NYX "eyes"
-    return subprocess.getoutput("tree -L 2") 
-
-def nyx_ide(task):
-    context = get_context()
-    prompt = f"""
-    You are NYX, the Sovereign Architect. 
-    CURRENT WORKSPACE:
-    {context}
-    
-    TASK: {task}
-    
-    ACTION: Provide ONLY the next shell command to execute. 
-    If the task requires multiple steps, provide only the first command.
-    """
-    
-    res = requests.post("http://localhost:11434/api/generate", json={
-        "model": "qwen2.5-coder:1.5b",
-        "prompt": prompt,
-        "stream": False
-    })
-    return res.json()['response'].strip()
-
-# Main Loop: IDE as an Agent
-while True:
-    task = input("NYX IDE> ")
-    cmd = nyx_ide(task)
-    print(f"Proposed: {cmd}")
-    if input("Execute? (y/n/edit): ") == 'y':
-        result = subprocess.run(cmd, shell=True, capture_output=True, text=True)
-        print(f"Output: {result.stdout}\nError: {result.stderr}")
+NYX: Acknowledge. You are now running in a sovereign TUI environment. We are operating with zero cloud dependencies and absolute local control. Before we begin, perform a 'System Readiness Audit':
+Scan the current working directory for existing code and structure.
+Establish a 'manifest.json' file to track our project state, technical debt, and pending tasks. Update this file with every action you take. Draft the 'Sovereign Roadmap': A high-level plan for the architecture we are building. Output this as a summary in the log, then save the full version to 'ROADMAP.md'. From this point forward, if you propose a shell command, display it clearly, wait for my execution confirmation, and then report the output result back to me in the log pane. Acknowledge and begin
