@@ -1,13 +1,13 @@
 import os
 import asyncio
 import mmap
-import time
+import sys
 
 class SovereignBrain:
     def __init__(self, path=os.path.expanduser("~/.nyx/memory.bin")):
         self.path = path
         os.makedirs(os.path.dirname(self.path), exist_ok=True)
-        # 1MB Pre-allocated Flat-Brain
+        # Allocate 1MB for the binary index
         if not os.path.exists(self.path):
             with open(self.path, "wb") as f: f.write(b'\x00' * 1048576)
         self.file = open(self.path, "r+b")
@@ -27,20 +27,29 @@ class NyxEngine:
         self.running = True
 
     async def render_tui(self):
-        while self.running:
-            # Flicker-free terminal refresh
-            sys.stdout.write("\033[H")
-            sys.stdout.write(f"NYX-CAT STATUS: SOVEREIGN | MEMORY: {self.brain.read()}\033[K\n")
+        # Enter alternate screen buffer and hide cursor
+        sys.stdout.write("\033[?1049h\033[?25l")
+        sys.stdout.flush()
+        try:
+            while self.running:
+                sys.stdout.write("\033[H\033[2J") # Clear screen
+                sys.stdout.write("NYX-CAT: SOVEREIGN INTELLIGENCE ACTIVE\n")
+                sys.stdout.write("======================================\n")
+                sys.stdout.write(f"MEMORY BUS: {self.brain.read()}\n")
+                sys.stdout.write("STATUS: AWAITING SWARM INPUT...\n")
+                sys.stdout.flush()
+                await asyncio.sleep(0.5)
+        finally:
+            # Cleanup: restore screen and cursor
+            sys.stdout.write("\033[?1049l\033[?25h")
             sys.stdout.flush()
-            await asyncio.sleep(0.5)
 
     async def run(self):
-        await asyncio.gather(self.render_tui())
+        await self.render_tui()
 
 if __name__ == "__main__":
-    import sys
     engine = NyxEngine()
     try:
         asyncio.run(engine.run())
     except KeyboardInterrupt:
-        pass
+        engine.running = False
