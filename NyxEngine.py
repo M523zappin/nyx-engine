@@ -1,45 +1,42 @@
-import curses
-import os
-import mmap
+import os, mmap, sys, time
 
 class Brain:
     def __init__(self, path=os.path.expanduser("~/.nyx.bin")):
         if not os.path.exists(path):
-            with open(path, "wb") as f: f.write(b'\x00' * 1024)
-        self.mem = mmap.mmap(os.open(path, os.O_RDWR), 1024)
+            with open(path, "wb") as f: f.write(b'\x00' * 2048)
+        self.mem = mmap.mmap(os.open(path, os.O_RDWR), 2048)
     def read(self):
-        self.mem.seek(0); return self.mem.read(1024).decode().strip('\x00')
+        self.mem.seek(0); return self.mem.read(2048).decode().strip('\x00')
     def write(self, txt):
-        self.mem.seek(0); self.mem.write(txt.encode().ljust(1024, b'\x00'))
+        self.mem.seek(0); self.mem.write(txt.encode().ljust(2048, b'\x00'))
 
-def main(stdscr):
+def main():
     brain = Brain()
-    # Setup Colors
-    curses.curs_set(1)
-    stdscr.clear()
+    # Force Alternate Buffer (Full Screen Takeover)
+    sys.stdout.write("\033[?1049h\033[2J")
     
-    while True:
-        height, width = stdscr.getmaxyx()
-        stdscr.clear()
-        
-        # Header // Styled
-        stdscr.addstr(0, 0, "NYX // SOVEREIGN ENGINE", curses.A_BOLD)
-        stdscr.addstr(1, 0, "-" * width)
-        
-        # Memory Bus // Centered-ish
-        stdscr.addstr(3, 2, f"MEMORY: {brain.read()}")
-        
-        # Chat Box // Anchored to bottom
-        stdscr.addstr(height-2, 0, "-" * width)
-        stdscr.addstr(height-1, 0, "INPUT >> ")
-        
-        stdscr.refresh()
-        
-        # Capture input
-        stdscr.echo()
-        cmd = stdscr.getstr(height-1, 9, width-10).decode('utf-8')
-        if cmd:
-            brain.write(cmd)
+    try:
+        while True:
+            # Get terminal dimensions for clean layout
+            try:
+                rows, cols = os.get_terminal_size()
+            except:
+                rows, cols = 24, 80
+            
+            # Draw UI
+            sys.stdout.write(f"\033[H\033[1;36mNYX // SOVEREIGN NODE\033[0m\n")
+            sys.stdout.write(f"LOG: {brain.read()}\n")
+            
+            # Draw Input Bar at Bottom
+            sys.stdout.write(f"\033[{rows};1H\033[47;30m CHAT >> \033[0m ")
+            sys.stdout.flush()
+            
+            # Simple, non-blocking input
+            cmd = sys.stdin.readline().strip()
+            if cmd:
+                brain.write(f"NYX: '{cmd}' PROCESSED.")
+    finally:
+        sys.stdout.write("\033[?1049l")
 
 if __name__ == "__main__":
-    curses.wrapper(main)
+    main()
