@@ -1,4 +1,6 @@
-import os, asyncio, mmap, sys
+import curses
+import os
+import mmap
 
 class Brain:
     def __init__(self, path=os.path.expanduser("~/.nyx.bin")):
@@ -10,32 +12,34 @@ class Brain:
     def write(self, txt):
         self.mem.seek(0); self.mem.write(txt.encode().ljust(1024, b'\x00'))
 
-async def main():
+def main(stdscr):
     brain = Brain()
-    # INITIALIZATION: Set background to deep black/navy (ANSI 0;38;5;232)
-    # This overrides the default terminal look-and-feel.
-    sys.stdout.write("\033[?1049h\033[48;5;232m\033[38;5;15m\033[2J")
+    # Setup Colors
+    curses.curs_set(1)
+    stdscr.clear()
     
-    try:
-        while True:
-            rows, cols = os.get_terminal_size()
-            sys.stdout.write("\033[H")
-            # Minimalist, clean headers
-            sys.stdout.write("\033[1mNYX // SOVEREIGN ENGINE\033[0m\n")
-            sys.stdout.write(f"MEMORY: {brain.read()}\n")
-            
-            # Draw persistent input area
-            sys.stdout.write(f"\033[{rows};1H\033[48;5;235m") # Subtle grey footer
-            sys.stdout.write(" INPUT >> ")
-            sys.stdout.flush()
-            
-            cmd = await asyncio.get_event_loop().run_in_executor(None, sys.stdin.readline)
-            if cmd.strip():
-                brain.write(cmd.strip())
-                # Clear chat input line efficiently
-                sys.stdout.write(f"\033[{rows};1H\033[K")
-    finally:
-        sys.stdout.write("\033[0m\033[?1049l")
+    while True:
+        height, width = stdscr.getmaxyx()
+        stdscr.clear()
+        
+        # Header // Styled
+        stdscr.addstr(0, 0, "NYX // SOVEREIGN ENGINE", curses.A_BOLD)
+        stdscr.addstr(1, 0, "-" * width)
+        
+        # Memory Bus // Centered-ish
+        stdscr.addstr(3, 2, f"MEMORY: {brain.read()}")
+        
+        # Chat Box // Anchored to bottom
+        stdscr.addstr(height-2, 0, "-" * width)
+        stdscr.addstr(height-1, 0, "INPUT >> ")
+        
+        stdscr.refresh()
+        
+        # Capture input
+        stdscr.echo()
+        cmd = stdscr.getstr(height-1, 9, width-10).decode('utf-8')
+        if cmd:
+            brain.write(cmd)
 
 if __name__ == "__main__":
-    asyncio.run(main())
+    curses.wrapper(main)
