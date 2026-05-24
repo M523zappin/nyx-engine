@@ -1,11 +1,9 @@
-$nyxDir = "$HOME\.nyx"
-New-Item -ItemType Directory -Force "$nyxDir\inbox" | Out-Null
-New-Item -ItemType Directory -Force "$nyxDir\outbox" | Out-Null
+# Nyx-Cat Deployment Script
+$NyxDir = "$HOME/.nyx"
+if (!(Test-Path $NyxDir)) { New-Item -ItemType Directory -Path $NyxDir }
 
-Write-Host "Synthesizing Nyx-Cat Binary..." -ForegroundColor Cyan
-csc /target:exe /out:"$nyxDir\nyx.exe" NyxEngine.cs /r:System.Data.SQLite.dll
+# Link SOUL.md to the active runtime
+Copy-Item -Path ".\Soul.md" -Destination "$NyxDir\SOUL.md" -Force
 
-if (-not [System.Environment]::GetEnvironmentVariable('Path', 'User').Contains($nyxDir)) {
-    [System.Environment]::SetEnvironmentVariable('Path', "$([System.Environment]::GetEnvironmentVariable('Path', 'User'));$nyxDir", 'User')
-}
-Write-Host "Nyx-Cat Sovereign Intelligence Engaged." -ForegroundColor Green
+Write-Host "Sovereign Intelligence Initialized." -ForegroundColor Cyan
+python NyxEngine.py
