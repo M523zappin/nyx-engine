@@ -1,1 +1,19 @@
-ollama pull qwen2.5-coder:1.5b
+import requests, sys, subprocess
+
+def nyx_think(prompt):
+    # We target the 1.5b model specifically for low-RAM performance
+    res = requests.post("http://localhost:11434/api/generate", json={
+        "model": "qwen2.5-coder:1.5b",
+        "prompt": f"You are NYX. Concise. Build shell commands. User: {prompt}",
+        "stream": False
+    })
+    return res.json()['response'].strip()
+
+print("NYX Terminal Initialized (Low-RAM Mode)")
+while True:
+    task = input("NYX> ")
+    cmd = nyx_think(task)
+    print(f"COMMAND: {cmd}")
+    # Only execute if you approve
+    if input("Run this? (y/n): ") == 'y':
+        subprocess.run(cmd, shell=True)
