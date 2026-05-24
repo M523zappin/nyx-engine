@@ -4,20 +4,33 @@ using System.IO.Pipes;
 
 class NyxClient {
     static void Main(string[] args) {
-        if (args.Length == 0) return;
+        if (args.Length == 0) {
+            Console.WriteLine("Nyx: Awaiting command.");
+            return;
+        }
+
         string command = string.Join(" ", args);
         
         try {
             using (var client = new NamedPipeClientStream(".", "NyxPipe", PipeDirection.InOut)) {
-                client.Connect(500); // 500ms timeout
+                // Connect with a 1-second timeout to allow the daemon breathing room
+                client.Connect(1000); 
+
                 using (var writer = new StreamWriter(client) { AutoFlush = true })
                 using (var reader = new StreamReader(client)) {
                     writer.WriteLine(command);
-                    Console.WriteLine(reader.ReadLine());
+                    
+                    // Read the daemon's response
+                    string response = reader.ReadLine();
+                    Console.WriteLine(response ?? "Nyx: No response received.");
                 }
             }
-        } catch {
-            Console.WriteLine("Error: Nyx Daemon is not running. Please start it.");
+        } catch (TimeoutException) {
+            Console.WriteLine("Error: Nyx Daemon connection timed out. Is the kernel running?");
+        } catch (IOException) {
+            Console.WriteLine("Error: Pipe broken. The Daemon may have terminated unexpectedly.");
+        } catch (Exception ex) {
+            Console.WriteLine($"Error: {ex.Message}");
         }
     }
 }
