@@ -4,8 +4,9 @@ import sys
 import threading
 import hashlib
 
-# ANSI Colors for Visual Identity
-COLORS = {"R": "\033[91m", "G": "\033[92m", "Y": "\033[93m", "B": "\033[94m", "C": "\033[96m", "RESET": "\033[0m"}
+# Configuration Constants
+COLORS = {"R": "\033[91m", "G": "\033[92m", "Y": "\033[93m", "C": "\033[96m", "RESET": "\033[0m"}
+SOUL_PATH = os.path.join(os.path.expanduser("~"), ".nyx", "SOUL.md")
 
 class SovereignBrain:
     def __init__(self, storage=".nyx_memory.bin"):
@@ -23,15 +24,19 @@ class SovereignBrain:
                 if line.startswith(search_hash): return line.split("|")[2]
         return None
 
-# Global State
+# State
 brain = SovereignBrain()
-last_response = "System Initialized. Awaiting Directive."
+last_response = "System Synchronized. Identity Loaded."
 is_running = True
+
+def get_soul():
+    if os.path.exists(SOUL_PATH):
+        with open(SOUL_PATH, "r") as f: return f.readline().strip("# ")
+    return "NYX-CAT"
 
 def input_bus():
     global last_response
     while is_running:
-        # Move cursor to bottom for chat
         sys.stdout.write(f"\033[15;1H{COLORS['C']} > {COLORS['RESET']}")
         sys.stdout.flush()
         cmd = sys.stdin.readline().strip()
@@ -39,21 +44,21 @@ def input_bus():
         
         recalled = brain.recall(cmd)
         if recalled:
-            last_response = f"Recalled: {recalled[:35]}..."
+            last_response = f"Recall: {recalled[:35]}..."
         else:
-            last_response = "Synthesizing tactical response..."
+            last_response = "Synthesizing new strategy..."
             brain.graft(cmd, "Optimized execution sequence.")
 
 def render_ui():
-    sys.stdout.write("\033[2J\033[?25l") # Clear and Hide Cursor
+    sys.stdout.write("\033[2J\033[?25l")
     while is_running:
-        sys.stdout.write("\033[H") # Snap to top
+        sys.stdout.write("\033[H")
         pulse = int(time.time() % 2)
         c = COLORS['G'] if pulse == 0 else COLORS['C']
         
         ui = [
             f"{c}╔══════════════════════════════════════════════════════╗{COLORS['RESET']}",
-            f"{c}║           NYX-CAT SOVEREIGN INTELLIGENCE             ║{COLORS['RESET']}",
+            f"{c}║           {get_soul():^36}           ║{COLORS['RESET']}",
             f"{c}╠══════════════════════════════════════════════════════╣{COLORS['RESET']}",
             f"{c}║{COLORS['RESET']} STATUS: {COLORS['Y']}AUTONOMOUS{COLORS['RESET']} ACTIVE                        {c}║{COLORS['RESET']}",
             f"{c}║{COLORS['RESET']} MEMORY: {brain.storage}                      {c}║{COLORS['RESET']}",
@@ -65,7 +70,8 @@ def render_ui():
         sys.stdout.flush()
         time.sleep(0.5)
 
-# Launch
-threading.Thread(target=render_ui, daemon=True).start()
-input_bus()
-sys.stdout.write("\033[?25h") # Restore Cursor
+# Execution
+if __name__ == "__main__":
+    threading.Thread(target=render_ui, daemon=True).start()
+    input_bus()
+    sys.stdout.write("\033[?25h")
