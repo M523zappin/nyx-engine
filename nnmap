@@ -1,1 +1,1 @@
-agy agent create --name nyx --model gemini-3.5-flash
+ollama pull qwen2.5-coder:1.5b
