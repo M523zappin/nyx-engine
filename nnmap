@@ -1,1 +1,2 @@
-pip install bitsandbytes accelerate
+# Removes HuggingFace cache to ensure a fresh, clean load
+Remove-Item -Recurse -Force "$env:USERPROFILE\.cache\huggingface\hub"
