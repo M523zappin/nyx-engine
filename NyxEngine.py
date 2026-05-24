@@ -1,28 +1,38 @@
-import os, mmap, sys
+import os, mmap, sys, ast
 
-class Brain:
-    def __init__(self, path=os.path.join(os.getcwd(), ".nyx.bin")):
-        if not os.path.exists(path):
-            with open(path, "wb") as f: f.write(b'\x00' * 4096)
-        self.mem = mmap.mmap(os.open(path, os.O_RDWR), 4096)
-    def read(self):
-        self.mem.seek(0); return self.mem.read(4096).decode().strip('\x00')
-    def write(self, txt):
-        self.mem.seek(0); self.mem.write(txt.encode().ljust(4096, b'\x00'))
+class Sentinel:
+    """The Gatekeeper: Ensures core integrity before execution."""
+    ALLOWED = {'os', 'mmap', 'sys', 'ast'}
+    
+    @staticmethod
+    def verify():
+        with open(__file__, "r") as f:
+            tree = ast.parse(f.read())
+            for node in ast.walk(tree):
+                if isinstance(node, ast.Import):
+                    for alias in node.names:
+                        if alias.name not in Sentinel.ALLOWED:
+                            return False
+        return True
 
 def run():
-    brain = Brain()
-    sys.stdout.write("\033[?1049h\033[2J") # Screen lock
+    # Health Check
+    if not Sentinel.verify():
+        print("CRITICAL: Integrity breach detected in source. Reverting to safe mode.")
+        sys.exit(1)
+        
+    # Execution
+    sys.stdout.write("\033[?1049h\033[2J")
     try:
         while True:
+            # Main UI Loop
             rows, cols = os.get_terminal_size()
-            sys.stdout.write(f"\033[H\033[1;36mNYX // SOVEREIGN NODE\033[0m\n")
-            sys.stdout.write(f"MEM_BUS: {brain.read()}\n")
+            sys.stdout.write(f"\033[H\033[1;36mNYX // SOVEREIGN NODE // STATUS: SECURE\033[0m\n")
             sys.stdout.write(f"\033[{rows};1H\033[47;30m CHAT >> \033[0m ")
             sys.stdout.flush()
             
             cmd = sys.stdin.readline().strip()
-            if cmd: brain.write(f"SYSTEM: '{cmd}' RECEIVED.")
+            if cmd.lower() == "exit": break
     finally:
         sys.stdout.write("\033[?1049l")
 
